@@ -14,7 +14,7 @@ export default {
 <template>
     <header class="flex justify-between border-b border-slate-300 px-8 py-8 ">
         <div class="flex items-center gap-4 ">
-          <img src="/logo.png" alt="Logo" class="h-10">
+          <router-link to="/" ><img src="/logo.png" alt="Logo" class="h-10"></router-link>
           <div>
             <h2 class="text-3xl font-bold max-sm:text-sm ">Smart <span>Nara</span></h2>
             <p class="text-xl max-sm:text-sm">Магазин ремонта техники</p>

@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import CardList from './views/CardList.vue'
 import BasketApp from './views/BasketApp.vue'
 import FavoriteApp from './views/FavoriteApp.vue'
+import PolicyApp from './views/PolicyApp.vue'
 
 
 
@@ -31,5 +32,11 @@ export default createRouter({
             component:FavoriteApp,
 
          },
+         {
+            path: '/privacy-policy',
+            name: 'PrivacyPolicy',
+            component: PolicyApp
+          }
+      
     ]
 })

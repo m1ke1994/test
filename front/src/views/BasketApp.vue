@@ -98,8 +98,12 @@ export default {
           />
         </svg>
         </div>
-        <h2 class="text-3xl font-bold max-sm:text-lg" v-if="!success">Оформление заказа</h2>
-        <h2 class="text-3xl font-bold max-sm:text-lg" v-if="success">Перейти на главную</h2>
+        <div class="flex gap-4 items-cente">
+          <h2 class="text-3xl font-bold max-sm:text-lg" v-if="!success">Оформление заказа</h2>
+          <router-link to="/privacy-policy" class="hover:underline me-4 md:me-6 w-8"><img src="/public/contract-file.png"></img></router-link>
+          <h2 class="text-3xl font-bold max-sm:text-lg" v-if="success">Перейти на главную</h2>
+        </div>
+        
       </div>
       <div class="text-red-500 text-3xl max-sm:text-lg" v-if="error">Заполните все поля, попробуйте ещё раз</div>
       <div class="text-lime-600 text-4xl  text-center mt-10 max-sm:text-lg" v-if="success">Заказ успешно оформлен. Скоро с вами свяжется наш менеджер.</div>
@@ -187,7 +191,7 @@ export default {
                 </div>
                 
                 <div class="flex flex-col max-md:w-auto">
-  <label for="street">Описание проблемы:</label>
+  <label for="street"> Модель устройства и описание проблемы:</label>
   <textarea
     v-model="description"
     @input="allFields"

@@ -1,39 +1,25 @@
 require('dotenv').config();
-
-let express = require(`express`);
-let app = express();
-let cors = require('cors');
+const TelegramBot = require('node-telegram-bot-api');
+const express = require('express');
+const app = express();
+const cors = require('cors');
 const PORT = process.env.PORT || 3000;
-
 
 // Настройка POST-запроса — JSON
 app.use(express.json());
 app.use(express.static('public'));
 app.listen(PORT, function () {
-    console.log(`http://localhost:${PORT}`);
+    console.log(`Server is running on http://localhost:${PORT}`);
 });
 
 // Настройка CORS
-
 app.use(cors({
-    
-    origin:' http://localhost:5173',
-  }));
-  app.options('*', cors());
-// Настройка POST-запроса — JSON
-app.use(express.json());
-
-
-
-
-
-
-
-
+    origin: 'http://localhost:5173',
+}));
+app.options('*', cors());
 
 // Настройка БД
-
-let mongoose = require('mongoose');
+const mongoose = require('mongoose');
 const mongo_Url = process.env.MONGODB_URL;
 
 mongoose.connect(mongo_Url, {
@@ -43,59 +29,43 @@ mongoose.connect(mongo_Url, {
     console.error('Failed to connect to MongoDB', err);
 });
 
-
-
 // Схемы
 
-
-let smartfoneSchema = new mongoose.Schema({
+const smartfoneSchema = new mongoose.Schema({
     title: String,
     price: Number,
     image: String,
-    isFavorite:Boolean,
-    isAdded:Boolean,
+    isFavorite: Boolean,
+    isAdded: Boolean,
     category: String,
     model: String,
+});
+const Smartfone = mongoose.model('smartfones', smartfoneSchema);
 
-    
-})
-let Smartfone = mongoose.model('smartfones', smartfoneSchema)
-
-
-
-
-
-let productsSchema = new mongoose.Schema({
+const productsSchema = new mongoose.Schema({
     title: String,
     price: Number,
     image: String,
-    isFavorite:Boolean,
-    isAdded:Boolean,
+    isFavorite: Boolean,
+    isAdded: Boolean,
     category: String,
     model: String,
-    color:String,
+    color: String,
+});
 
-    
-})
-
-
-// Роуты 
-//получение услуг по всем смартфонам
+// Роуты
 app.get('/all', async function (req, res) {
-    let model=req.query.model;
-    let category=req.query.category;
-    let search={};
+    let model = req.query.model;
+    let category = req.query.category;
+    let search = {};
 
-    if(model){
-         // Убираем пробелы в начале и в конце строки
+    if (model) {
         model = model.trim();
         search.model = { $regex: model, $options: 'i' };
-         // Регулярное выражение для нечувствительного к регистру поиска
     }
-    if(category){
-         // Убираем пробелы в начале и в конце строки
-         category = category.trim();
-        search.category=category;
+    if (category) {
+        category = category.trim();
+        search.category = category;
     }
     try {
         let data = await Smartfone.find(search).limit(23);
@@ -104,60 +74,78 @@ app.get('/all', async function (req, res) {
         console.error(error);
         res.status(500).send('Internal Server Error');
     }
-    
 });
 
-
-
-/* отправление данных на серер и затем в баззу данных */
-let orderSchema = new mongoose.Schema({
-  firstName: { type: String, required: true },
-  lastName: { type: String, required: true },
-  middleName: String,
-  telephone: { type: Number, required: true },
-  email: { type: String, required: true },
-  adress:{ type: String, required: true },
-  description:{ type: String, required: true },
-  price:{ type: Number, required: true },
-  products:{ type: Array, required: true }
+// Отправление данных на сервер и затем в базу данных
+const orderSchema = new mongoose.Schema({
+    orderNumber: Number,
+    firstName: { type: String, required: true },
+    lastName: { type: String, required: true },
+    middleName: String,
+    telephone: { type: Number, required: true },
+    email: { type: String, required: true },
+    adress: { type: String, required: true },
+    description: { type: String, required: true },
+    price: { type: Number, required: true },
+    products: { type: Array, required: true }
 }, {
-  timestamps: true
+    timestamps: true
 });
 
-let Order = mongoose.model('order', orderSchema);
+const Order = mongoose.model('order', orderSchema);
 
+const counterSchema = new mongoose.Schema({
+    _id: String,
+    sequence_value: Number
+});
+
+const Counter = mongoose.model('Counter', counterSchema);
+
+async function getNextOrderNumber() {
+    const counter = await Counter.findByIdAndUpdate(
+        'orderNumber',
+        { $inc: { sequence_value: 1 } },
+        { new: true, upsert: true }
+    );
+    return counter.sequence_value;
+}
 
 app.post('/order', async (req, res) => {
     try {
-      const order = new Order({
-        firstName: req.body.firstName,
-        lastName: req.body.lastName,
-        middleName: req.body.middleName,
-        telephone: req.body.telephone,
-        email: req.body.email,
-        adress:req.body.adress,
-        description:req.body.description,
-        price:req.body.price,
-        products:req.body.products
-      });
-      
-      await order.save();
-      res.sendStatus(201); // Отправка статуса 201 (Created) при успешном создании заказа
+        const orderNumber = await getNextOrderNumber();
+
+        const order = new Order({
+            orderNumber,
+            firstName: req.body.firstName,
+            lastName: req.body.lastName,
+            middleName: req.body.middleName,
+            telephone: req.body.telephone,
+            email: req.body.email,
+            adress: req.body.adress,
+            description: req.body.description,
+            price: req.body.price,
+            products: req.body.products
+        });
+
+        await order.save();
+
+        // Отправка уведомления о новом заказе в Telegram
+        const botToken = process.env.TELEGRAM_BOT_TOKEN;
+        const chatId = process.env.TELEGRAM_CHAT_ID;
+        const bot = new TelegramBot(botToken, { polling: false }); // Отключаем polling
+
+        // Получаем названия и модели товаров
+        const productDetails = await Promise.all(order.products.map(async (productId) => {
+            const product = await Smartfone.findById(productId);
+            return product ? `${product.title} (${product.model})` : 'Неизвестный товар';
+        }));
+
+        const message = `Новый заказ #${orderNumber}!\n\nИмя: ${order.firstName} ${order.lastName}\nТелефон: ${order.telephone}\nEmail: ${order.email}\nАдрес: ${order.adress}\nОписание: ${order.description}\nЦена: ${order.price}\nТовары: ${productDetails.join(', ')}`;
+        bot.sendMessage(chatId, message);
+
+        res.sendStatus(201); // Отправка статуса 201 (Created) при успешном создании заказа
     } catch (error) {
-      console.error(error);
-      res.status(500).send('Internal Server Error'); // Обработка ошибок и отправка статуса 500 (Internal Server Error)
+        console.error(error);
+        res.status(500).send('Internal Server Error'); // Обработка ошибок и отправка статуса 500 (Internal Server Error)
     }
-  });
-
-
-
-
-  
-
-
-
-
-
-
-
-
+});

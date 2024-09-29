@@ -6,6 +6,8 @@ axios.defaults.baseURL = "http://localhost:3000";
 import HeaderApp from "./components/HeaderApp.vue";
 import CardApp from "./components/CardApp.vue";
 import DrawerApp from "./components/DrawerApp.vue";
+import FuterApp from "./components/FuterApp.vue";
+import PolicyApp from "./views/PolicyApp.vue";
 
 export default {
   components: {
@@ -13,6 +15,8 @@ export default {
     HeaderApp,
     CardApp,
     DrawerApp,
+    FuterApp,
+    PolicyApp,
   },
   data() {
     return {
@@ -37,6 +41,7 @@ export default {
      goFavorite() {
        this.$router.push('/favorite');
      },
+    
 
 
 
@@ -231,11 +236,11 @@ export default {
     
   </div>
   
-  <div class="text-center p-10" v-if="$route.path === '/'">
-  <button @click="goBasket" class="bg-lime-600 border px-8 py-2 rounded-md hover:bg-lime-700 transition text-white text-lg">Другая проблема</button>
+  <div class="text-center p-10 mb-10" v-if="$route.path === '/'">
+  <button @click="goBasket" class="bg-lime-600 border px-8 py-2 rounded-md hover:bg-lime-700 transition text-white text-lg">Другой аппарат</button>
 </div>
   </div>
-
+ <FuterApp></FuterApp>
 </template>
 
 <style scoped>
