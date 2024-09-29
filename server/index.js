@@ -4,19 +4,23 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 const PORT = process.env.PORT || 3005;
-
+// Настройка CORS
+app.use(cors());
+app.use(express.static(path.join(__dirname, '../front/dist')));
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../front/dist/index.html'));
+});
+// Обработка предварительных запросов OPTIONS
+app.options('*', cors());
 // Настройка POST-запроса — JSON
 app.use(express.json());
 app.use(express.static('public'));
-app.listen(PORT, function () {
-    console.log(`Server is running on http://localhost:${PORT}`);
+// Настройка сервера
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`http://94.241.141.209:${PORT}`);
 });
 
-// Настройка CORS
-app.use(cors({
-    origin: 'http://localhost:5173',
-}));
-app.options('*', cors());
+
 
 // Настройка БД
 const mongoose = require('mongoose');
