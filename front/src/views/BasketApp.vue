@@ -1,6 +1,7 @@
 
 <script>
-import axios from 'axios';
+import apiClient from '../api/axios';
+
 export default {
   props: {
      added: Array,
@@ -31,7 +32,7 @@ export default {
 
  async createOrder(){
   try{
-    await axios.post('http://localhost:3000/order',{
+    await apiClient .post('/order',{
       firstName:this.firstName,
       lastName:this.lastName,
       middleName:this.middleName,

@@ -1,13 +1,11 @@
 <script>
 import { RouterView } from "vue-router";
 import axios from "axios";
-
-axios.defaults.baseURL = "http://localhost:3000";
+import apiClient from './api/axios';
+axios.defaults.baseURL = "http://localhost:3005";
 import HeaderApp from "./components/HeaderApp.vue";
 import CardApp from "./components/CardApp.vue";
 import DrawerApp from "./components/DrawerApp.vue";
-import FuterApp from "./components/FuterApp.vue";
-import PolicyApp from "./views/PolicyApp.vue";
 
 export default {
   components: {
@@ -15,8 +13,6 @@ export default {
     HeaderApp,
     CardApp,
     DrawerApp,
-    FuterApp,
-    PolicyApp,
   },
   data() {
     return {
@@ -30,10 +26,7 @@ export default {
     };
   },
   methods: {
-    goBasket(){
-            this.$router.push({name:'basket'});
-            
-        },
+
 
     goHome() {
        this.$router.push('/');
@@ -41,7 +34,6 @@ export default {
      goFavorite() {
        this.$router.push('/favorite');
      },
-    
 
 
 
@@ -49,7 +41,7 @@ export default {
 
 
     async loadSmartfones() {
-      let response = await axios.get(`/all`, {
+      let response = await apiClient.get(`/all`, {
         params: {
           category: this.category,
           model: this.model,
@@ -63,7 +55,7 @@ export default {
       this.syncSmartfonesWithAdded();
       this.syncSmartfonesWithFavorites();
     },
-    
+
     fetchFavorites(id) {
       for (let i = 0; i < this.smartfones.length; i++) {
         if (this.smartfones[i]._id === id) {
@@ -154,7 +146,7 @@ export default {
   },
 
 
- 
+
 
 
 
@@ -166,7 +158,7 @@ export default {
     this.loadFavoritesFromLocalStorage();
   },
 
- 
+
 
 
 
@@ -188,7 +180,7 @@ export default {
       return this.$route.path === '/favorite';
     },
   },
-  
+
 };
 </script>
 

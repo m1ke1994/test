@@ -3,7 +3,7 @@ const TelegramBot = require('node-telegram-bot-api');
 const express = require('express');
 const app = express();
 const cors = require('cors');
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3005;
 
 // Настройка POST-запроса — JSON
 app.use(express.json());
@@ -54,7 +54,7 @@ const productsSchema = new mongoose.Schema({
 });
 
 // Роуты
-app.get('/all', async function (req, res) {
+app.get('/api/all', async function (req, res) {
     let model = req.query.model;
     let category = req.query.category;
     let search = {};
@@ -110,7 +110,7 @@ async function getNextOrderNumber() {
     return counter.sequence_value;
 }
 
-app.post('/order', async (req, res) => {
+app.post('/api/order', async (req, res) => {
     try {
         const orderNumber = await getNextOrderNumber();
 
