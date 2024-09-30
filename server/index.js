@@ -1,6 +1,7 @@
 require('dotenv').config();
 const TelegramBot = require('node-telegram-bot-api');
 const express = require('express');
+const path = require('path');
 const app = express();
 const cors = require('cors');
 const PORT = process.env.PORT || 3005;
@@ -17,7 +18,7 @@ app.use(express.json());
 app.use(express.static('public'));
 // Настройка сервера
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`http://147.45.143.61:${PORT}`);
+    console.log(`http://smart-nara.ru:${PORT}`);
 });
 
 
