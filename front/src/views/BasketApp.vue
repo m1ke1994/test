@@ -32,7 +32,7 @@ export default {
 
  async createOrder(){
   try{
-    await axios .post('/order',{
+    await axios.post('/order',{
       firstName:this.firstName,
       lastName:this.lastName,
       middleName:this.middleName,
