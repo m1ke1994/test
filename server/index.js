@@ -19,7 +19,7 @@ app.use(express.json());
 app.use(express.static('public'));
 // Настройка сервера
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`http://195.133.27.170:${PORT}`);
+    console.log(`147.45.143.61:${PORT}`);
 });
 
 

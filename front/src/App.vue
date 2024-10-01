@@ -5,7 +5,7 @@ import HeaderApp from "./components/HeaderApp.vue";
 import CardApp from "./components/CardApp.vue";
 import DrawerApp from "./components/DrawerApp.vue";
 
-axios.defaults.baseURL = "http://195.133.27.170:3005";
+axios.defaults.baseURL = "http://147.45.143.61:3005";
 
 export default {
   components: {
