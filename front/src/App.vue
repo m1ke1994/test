@@ -1,12 +1,11 @@
 <script>
 import { RouterView } from "vue-router";
 import axios from "axios";
-import apiClient from './api/axios';
 import HeaderApp from "./components/HeaderApp.vue";
 import CardApp from "./components/CardApp.vue";
 import DrawerApp from "./components/DrawerApp.vue";
 
-axios.defaults.baseURL = "http://smart-nara.ru:3005/api";
+axios.defaults.baseURL = "http://147.45.143.61:3005";
 
 export default {
   components: {
@@ -35,7 +34,7 @@ export default {
     },
     async loadSmartfones() {
       try {
-        let response = await apiClient.get(`/all`, {
+        let response = await axios.get(`/all`, {
           params: {
             category: this.category,
             model: this.model,
