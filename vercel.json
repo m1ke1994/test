@@ -1,11 +1,5 @@
 ﻿{
-  "version": 2,
-  "builds": [
-    {
-      "src": "front/package.json",
-      "use": "@vercel/static-build"
-    }
-  ],
+  "buildCommand": "cd front && npm ci && npm run build",
   "outputDirectory": "front/dist",
   "rewrites": [
     {
