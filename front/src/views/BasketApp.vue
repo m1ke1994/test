@@ -1,283 +1,262 @@
-
-<script>
-import axios from "axios";
+﻿<script>
+import { submitOrder } from "../services/mockApi.js";
 
 export default {
   props: {
-     added: Array,
-     fetchAdded: Function,
-     totalSum: Number,
-     goHome:Function,
-     clearAdded:Function,
-   },
+    added: Array,
+    fetchAdded: Function,
+    totalSum: Number,
+    goHome: Function,
+    clearAdded: Function,
+  },
   data() {
     return {
-      firstName: '',
-      lastName: '',
-      middleName: '',
-      telephone: '',
-      email: '',
-      adress:'',
-      description:'',
-      success:false,
-      error:false,
-      
+      firstName: "",
+      lastName: "",
+      middleName: "",
+      telephone: "",
+      email: "",
+      adress: "",
+      description: "",
+      success: false,
+      error: false,
+      orderNumber: null,
     };
   },
-  
+  computed: {
+    hasItems() {
+      return this.added.length > 0;
+    },
+  },
   methods: {
-   
+    async createOrder() {
+      if (!this.hasItems) {
+        this.error = true;
+        return;
+      }
 
+      try {
+        const order = await submitOrder({
+          firstName: this.firstName,
+          lastName: this.lastName,
+          middleName: this.middleName,
+          telephone: this.telephone,
+          email: this.email,
+          description: this.description,
+          adress: this.adress,
+          price: this.totalSum,
+          products: this.added,
+        });
 
+        this.resetForm();
+        this.orderNumber = order.orderNumber;
+        this.success = true;
+        this.error = false;
+        this.clearAdded();
 
- async createOrder(){
-  try{
-    await axios.post('/order',{
-      firstName:this.firstName,
-      lastName:this.lastName,
-      middleName:this.middleName,
-      telephone:this.telephone,
-      email:this.email,
-      description:this.description,
-      adress:this.adress,
-      price:this.totalSum,
-      products:this.added
-    });
-       
-      this.firstName='',
-      this.lastName='',
-      this.middleName='',
-      this.telephone='',
-      this.email='',
-      this.description='',
-      this.adress='',
-      this.success=true,
-      this.error=false
-      this.clearAdded();
-      // Перенаправление на главную страницу через 5 секунды
         setTimeout(() => {
           this.goHome();
         }, 5000);
-  } catch (err) {
-    this.success = false;
-    this.error = true;
-    }
-
-},
-
-
-},
-}
+      } catch (err) {
+        console.error("Не удалось оформить заказ:", err);
+        this.success = false;
+        this.error = true;
+        this.orderNumber = null;
+      }
+    },
+    handleInput() {
+      if (this.error) {
+        this.error = false;
+      }
+    },
+    resetForm() {
+      this.firstName = "";
+      this.lastName = "";
+      this.middleName = "";
+      this.telephone = "";
+      this.email = "";
+      this.description = "";
+      this.adress = "";
+    },
+  },
+};
 </script>
 
 <template>
-  <div class="p-10  ">
-    <div class="flex gap-2 items-center">
-      <div>
-        <svg
-          @click="goHome"
-          class="opacity-50 cursor-pointer rotate-180 hover:opacity-100 transition hover:-translate-x-1"
-          width="30"
-          height="30"
-          viewBox="0 0 16 14"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M1 7H14.7143"
-            stroke="black"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-          <path
-            d="M8.71436 1L14.7144 7L8.71436 13"
-            stroke="black"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
+  <div class="p-6 md:p-10">
+    <div class="flex items-center gap-4">
+      <button
+        type="button"
+        @click="goHome"
+        class="opacity-50 hover:opacity-100 transition hover:-translate-x-1"
+        aria-label="Вернуться в каталог"
+      >
+        <svg class="rotate-180" width="30" height="30" viewBox="0 0 16 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M1 7H14.7143" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M8.71436 1L14.7144 7L8.71436 13" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
-        </div>
-        <div class="flex gap-4 items-cente">
-          <h2 class="text-3xl font-bold max-sm:text-lg" v-if="!success">Оформление заказа</h2>
-          <router-link to="/privacy-policy" class="hover:underline me-4 md:me-6 w-8"><img src="/public/contract-file.png"></img></router-link>
-          <h2 class="text-3xl font-bold max-sm:text-lg" v-if="success">Перейти на главную</h2>
-        </div>
-        
+      </button>
+
+      <div class="flex items-center gap-4">
+        <h2 v-if="!success" class="text-3xl font-bold max-sm:text-lg">Оформление заказа</h2>
+        <h2 v-else class="text-3xl font-bold max-sm:text-lg">Заказ оформлен</h2>
+        <router-link to="/privacy-policy" class="hover:underline w-8">
+          <img src="/public/contract-file.png" alt="Политика конфиденциальности" />
+        </router-link>
       </div>
-      <div class="text-red-500 text-3xl max-sm:text-lg" v-if="error">Заполните все поля, попробуйте ещё раз</div>
-      <div class="text-lime-600 text-4xl  text-center mt-10 max-sm:text-lg" v-if="success">Заказ успешно оформлен. Скоро с вами свяжется наш менеджер.</div>
-<!-- создание инпуов -->
-<div v-if="!success">
-  <form @submit.prevent="createOrder">
-<div class="flex justify-around max-md:flex-col gap-2">
-  <div class="w-3/5 max-md:w-full text-sm">
-              <div class="flex flex-col my-2 ">
-                <label for="firstName">Введите Имя:</label>
-                <input
-                  v-model="firstName"
-                  @input="allFields"
-                  
-                  id="firstName"
-                  class="border border-black w-full rounded-md py-2 pr-4 outline-none pl-2"
-                  type="text"
-                  maxlength="20"
-                  placeholder="Имя"
-                />
-              </div>
-              <div class="flex flex-col my-2">
-                <label for="lastName">Введите Фамилию:</label>
-                <input
-                  v-model="lastName"
-                  @input="allFields"
-                  id="lastName"
-                  class="border border-black w-full rounded-md py-2 pr-4 outline-none pl-2"
-                  type="text"
-                  maxlength="15"
-                  placeholder="Фамилия"
-                />
-              </div>
-              <div class="flex flex-col my-2">
-                <label for="middleName">Введите Отчество:</label>
-                <input
-                  v-model="middleName"
-                  @input="allFields"
-                  id="middleName"
-                  class="border border-black w-full rounded-md py-2 pr-4 outline-none pl-2"
-                  type="text"
-                  maxlength="15"
-                  placeholder="Отчество"
-                />
-              </div>
-              <div class="flex flex-col my-2">
-                <label for="phone">Введите Телефон:</label>
-                <input
-                  v-model="telephone"
-                  @input="allFields"
-                  id="phone"
-                  class=" no-arrows border border-black w-full rounded-md py-2 pr-4 outline-none pl-2"
-                  type="number"
-                  maxlength="15"
-                  placeholder="89059770507"
-                />
-              </div>
-              
-            </div>
+    </div>
 
-            
-  <div class="w-3/5 max-md:w-full text-sm">
-    <div class="flex flex-col my-2 ">
-                <label for="email">Email:</label>
-                <input
-                  v-model="email"
-                  @input="allFields"
-                  id="email"
-                  class="border border-black w-full rounded-md py-2 pr-4 outline-none pl-2"
-                  type="email"
-                  maxlength="30"
-                  placeholder="Email"
-                />
-              </div>
-              <div class="flex flex-col my-2">
-                  <label for="area">Адрес:</label>
-                  <input
-                    v-model="adress"
-                    id="adress"
-                    class="border border-black w-full rounded-md py-2 pr-4 outline-none pl-2"
-                    type="text"
-                    maxlength="150"
-                    placeholder="Московская"
-                  />
-                </div>
-                
-                <div class="flex flex-col max-md:w-auto">
-  <label for="street"> Модель устройства и описание проблемы:</label>
-  <textarea
-    v-model="description"
-    @input="allFields"
-    id="description"
-    class="border border-black rounded-md py-2 pr-4 outline-none pl-2 input_description h-28"
-    maxlength="250"
-    placeholder="Описание проблемы"
-  ></textarea>
-</div>
-                
-                
-                <!-- создание кнопки -->
-              <div class="flex items-center flex-wrap gap-4 mt-6">
-               
-                <div class="flex gap-4 items-center">
-                  <span class="text-xl max-sm:text-lg">Итого:</span>
-                  <b class="text-xl my-3 max-sm:text-lg">{{ totalSum }} руб</b>
-                </div>
+    <p v-if="error" class="mt-6 text-center text-red-500 text-xl">
+      Проверьте данные формы и попробуйте ещё раз.
+    </p>
 
+    <div v-if="success" class="mt-10 bg-lime-50 border border-lime-200 rounded-xl p-8 text-center text-lime-700">
+      <p class="text-2xl font-semibold">Спасибо! Заказ №{{ orderNumber }} оформлен.</p>
+      <p class="mt-4 text-lg">Мы свяжемся с вами в ближайшее время для подтверждения деталей.</p>
+    </div>
 
-
-                <div class="flex  gap-4 ">
-                  <button type="submit"
-                  :disabled="totalSum===0"
-                  class=" w-3/5 bg-lime-600 w-auto px-3 rounded-xl py-3 hover:bg-lime-900 transition text-white disabled:bg-slate-500 cursor-pointer "
-                >
-                  Перейти к оплате заказа
-                </button>
-
-
-                <button type="submit"
-                  :disabled="totalSum>0"
-                  class=" w-3/5 bg-lime-600 w-auto px-3 rounded-xl py-3 hover:bg-lime-900 transition text-white disabled:bg-slate-500 cursor-pointer "
-                >
-                  Создать заявку на диагностику
-                </button>
-                </div>
-              </div>
-              
+    <div v-else class="mt-10">
+      <form @submit.prevent="createOrder" class="space-y-8">
+        <div class="grid gap-6 md:grid-cols-2">
+          <div class="space-y-4">
+            <label class="flex flex-col gap-2 text-sm">
+              <span>Имя</span>
+              <input
+                v-model="firstName"
+                @input="handleInput"
+                type="text"
+                maxlength="20"
+                placeholder="Иван"
+                class="border border-black/30 rounded-md py-2 px-3 outline-none focus:border-lime-500"
+              />
+            </label>
+            <label class="flex flex-col gap-2 text-sm">
+              <span>Фамилия</span>
+              <input
+                v-model="lastName"
+                @input="handleInput"
+                type="text"
+                maxlength="20"
+                placeholder="Петров"
+                class="border border-black/30 rounded-md py-2 px-3 outline-none focus:border-lime-500"
+              />
+            </label>
+            <label class="flex flex-col gap-2 text-sm">
+              <span>Отчество</span>
+              <input
+                v-model="middleName"
+                @input="handleInput"
+                type="text"
+                maxlength="20"
+                placeholder="Иванович"
+                class="border border-black/30 rounded-md py-2 px-3 outline-none focus:border-lime-500"
+              />
+            </label>
+            <label class="flex flex-col gap-2 text-sm">
+              <span>Телефон</span>
+              <input
+                v-model="telephone"
+                @input="handleInput"
+                type="tel"
+                maxlength="15"
+                placeholder="+7 999 000-00-00"
+                class="border border-black/30 rounded-md py-2 px-3 outline-none focus:border-lime-500"
+              />
+            </label>
           </div>
 
-</div>
-</form>
-</div>
+          <div class="space-y-4">
+            <label class="flex flex-col gap-2 text-sm">
+              <span>Email</span>
+              <input
+                v-model="email"
+                @input="handleInput"
+                type="email"
+                maxlength="30"
+                placeholder="email@example.com"
+                class="border border-black/30 rounded-md py-2 px-3 outline-none focus:border-lime-500"
+              />
+            </label>
+            <label class="flex flex-col gap-2 text-sm">
+              <span>Адрес доставки</span>
+              <input
+                v-model="adress"
+                @input="handleInput"
+                type="text"
+                maxlength="150"
+                placeholder="Город, улица, дом"
+                class="border border-black/30 rounded-md py-2 px-3 outline-none focus:border-lime-500"
+              />
+            </label>
+            <label class="flex flex-col gap-2 text-sm">
+              <span>Комментарий к заказу</span>
+              <textarea
+                v-model="description"
+                @input="handleInput"
+                maxlength="250"
+                placeholder="Пожелания по доставке"
+                class="border border-black/30 rounded-md py-2 px-3 outline-none focus:border-lime-500 h-28 resize-none"
+              ></textarea>
+            </label>
+          </div>
+        </div>
 
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+          <div class="text-xl">
+            <span class="text-gray-500">Итого:</span>
+            <b class="ml-2">{{ totalSum }} ₽</b>
+          </div>
 
+          <div class="flex flex-col md:flex-row gap-4 w-full md:w-auto">
+            <button
+              type="submit"
+              :disabled="totalSum === 0"
+              class="w-full md:w-auto bg-lime-600 px-5 py-3 rounded-xl text-white font-semibold hover:bg-lime-700 transition disabled:bg-slate-400 disabled:cursor-not-allowed"
+            >
+              Оформить заказ
+            </button>
+            <button
+              type="button"
+              @click="goHome"
+              class="w-full md:w-auto border border-lime-600 px-5 py-3 rounded-xl text-lime-700 font-semibold hover:bg-lime-50 transition"
+            >
+              Продолжить покупки
+            </button>
+          </div>
+        </div>
+      </form>
 
-    
-  
-
-
-
-
-
-
-</div>
-
+      <div class="mt-10 space-y-4">
+        <h3 class="text-2xl font-semibold">Товары в корзине</h3>
+        <div v-if="hasItems" class="space-y-4">
+          <div
+            v-for="item in added"
+            :key="item._id"
+            class="flex items-center justify-between border border-gray-200 rounded-xl p-4"
+          >
+            <div class="flex items-center gap-4">
+              <img :src="item.imageUrl || `/repair_photo/${item.image}`" alt="товар" class="w-16 h-16 rounded-md object-cover" />
+              <div>
+                <p class="font-medium">{{ item.title }} {{ item.model }}</p>
+                <p class="text-sm text-gray-500">{{ item.price }} ₽</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              class="text-red-500 hover:text-red-600 transition"
+              @click="fetchAdded(item._id)"
+            >
+              Удалить
+            </button>
+          </div>
+        </div>
+        <p v-else class="text-gray-500">Корзина пуста.</p>
+      </div>
+    </div>
+  </div>
 </template>
 
-<style scoped> 
-.p-10 {
-  width: 80%;
-}
-/* Базовые стили */
-.p-10 {
-  padding: 10px; /* Устанавливаем отступы по 10px */
-  width: 50%; /* Пример ширины для больших экранов */
-  margin: 0 auto; /* Центрируем блок */
-}
-
-/* Медиа-запрос для экранов шириной до 640px */
-@media (max-width: 2048px) {
-  .p-10 {
-    width: 100%; /* Делаем блок на всю ширину */
-    padding: 0; /* Убираем отступы, если нужно */
-  }
-}
-
-.no-arrows::-webkit-outer-spin-button,
-.no-arrows::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-.no-arrows {
--moz-appearance: textfield;
-}
-
+<style scoped>
 </style>
+
+

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+  <rect width="180" height="220" x="30" y="10" rx="32" fill="#0f172a"/>
+  <rect width="120" height="160" x="60" y="40" rx="18" fill="#2563eb"/>
+  <rect width="60" height="10" x="90" y="20" rx="4" fill="#60a5fa" opacity="0.7"/>
+  <rect width="14" height="14" x="113" y="206" rx="7" fill="#dbeafe" opacity="0.6"/>
+  <text x="120" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" fill="#dbeafe">
+    TECNO
+  </text>
+</svg>
+
